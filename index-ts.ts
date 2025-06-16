@@ -18,6 +18,9 @@ const fundButton = document.getElementById('fundButton') as HTMLButtonElement | 
 const ethAmountInput = document.getElementById('ethAmount') as HTMLInputElement | null
 const balanceButton = document.getElementById('BalanceButton') as HTMLButtonElement | null
 const withdrawButton = document.getElementById('withdrawButton') as HTMLButtonElement | null
+const getFundedAddressButton = document.getElementById('getFundedAddress') as HTMLButtonElement
+const fundedAddressDisplay = document.getElementById('fundedAddressDisplay') as HTMLParagraphElement 
+
 
 let walletClient: WalletClient | undefined
 let publicClient: PublicClient | undefined
@@ -61,6 +64,26 @@ async function fund(): Promise<void> {
     connectButton.innerHTML = 'Please install MetaMask!'
   }
 }
+
+async function getFundedAddress() {
+  if (typeof window.ethereum !== 'undefined') {
+    try {
+      walletClient = createWalletClient({
+        transport: custom(window.ethereum),
+      })
+
+      const [account] = await walletClient.requestAddresses()
+      fundedAddressDisplay.innerText = `Connected address: ${account}`
+      console.log("Connected address:", account)
+    } catch (error) {
+      console.error("Error getting address:", error)
+      fundedAddressDisplay.innerText = "Failed to fetch address"
+    }
+  } else {
+    fundedAddressDisplay.innerText = "MetaMask not detected"
+  }
+}
+
 
 async function getCurrentChain(client: WalletClient): Promise<Chain> {
   const chainId = await client.getChainId()
@@ -122,3 +145,4 @@ connectButton?.addEventListener('click', connect)
 fundButton?.addEventListener('click', fund)
 balanceButton?.addEventListener('click', getBalance)
 withdrawButton?.addEventListener('click', withdraw)
+getFundedAddressButton?.addEventListener('click',getFundedAddress)
